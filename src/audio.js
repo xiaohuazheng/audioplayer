@@ -29,6 +29,11 @@
 		$('body').prepend(style);
 	}
 
+	var onMobile = 'ontouchstart' in window,
+		eStart = onMobile ? 'touchstart' : 'mousedown',
+		eMove = onMobile ? 'touchmove' : 'mousemove',
+		eCancel = onMobile ? 'touchcancel' : 'mouseup';
+
 	$.fn.playerInit = function() {
 		// 遍历处理audio
 		this.each(function() {
@@ -109,13 +114,13 @@
 
 			function bindPageEvents() {
 				// 监听进度条touch，更新进度条和播放进度
-				$bar.on('touchstart', function(e) {
-					audioEle.currentTime = Math.round((audioEle.duration * (e.originalEvent.touches[0].pageX - $bar.offset().left)) / $bar.width());
-					$bar.on('touchmove', function(e) {
-						audioEle.currentTime = Math.round((audioEle.duration * (e.originalEvent.touches[0].pageX - $bar.offset().left)) / $bar.width());
+				$bar.on(eStart, function(e) {
+					audioEle.currentTime = getCurrentTime(e);
+					$bar.on(eMove, function(e) {
+						audioEle.currentTime = getCurrentTime(e);
 					});
-				}).on('touchcancel', function() {
-					$bar.unbind('touchmove');
+				}).on(eCancel, function() {
+					$bar.unbind(eMove);
 				});
 
 				// 监听播放暂停按钮click
@@ -129,6 +134,11 @@
 					}
 					return false;
 				});
+			}
+
+			function getCurrentTime(e) {
+				var et = onMobile ? e.originalEvent.touches[0] : e;
+				return Math.round((audioEle.duration * (et.pageX - $bar.offset().left)) / $bar.width());
 			}
 		});
 		return this;
