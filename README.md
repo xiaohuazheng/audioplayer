@@ -12,7 +12,7 @@
 
 ### Use
 
-    $(selector).playerInit();  // select 为audio元素，可以初始化多个
+    $(selector).initAudioPlayer();  // select 为audio元素，可以初始化多个
 
 播放器样式是写在js代码里的，如果有需要，可以把代码抠出来放在CSS文件里。然后再化成自己喜欢的样子。或者你产品经理喜欢的样子。
 
