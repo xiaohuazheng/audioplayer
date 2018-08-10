@@ -1,3 +1,6 @@
+# videoplayer
+mobile h5 audio player with DIY style based on jquery
+
 ### DIY
 
 我们一般都看不到Audio的样式，基本都被隐藏了。因为对于新时代的我们来说，暂时还没有get它的美。
