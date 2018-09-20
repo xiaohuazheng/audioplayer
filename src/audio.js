@@ -33,7 +33,9 @@
 	var onMobile = 'ontouchstart' in window,
 		eStart = onMobile ? 'touchstart' : 'mousedown',
 		eMove = onMobile ? 'touchmove' : 'mousemove',
-		eCancel = onMobile ? 'touchcancel' : 'mouseup';
+		eCancel = onMobile ? 'touchcancel' : 'mouseup',
+		hackPrefixes = ['webkit', 'moz', 'ms', 'o'],
+		hackHiddenProperty = getHackHidden();
 
 	$.fn.initAudioPlayer = function() {
 		// 遍历处理audio
@@ -141,6 +143,21 @@
 				var et = onMobile ? e.originalEvent.touches[0] : e;
 				return Math.round((audioEle.duration * (et.pageX - $bar.offset().left)) / $bar.width());
 			}
+
+			if (hackHiddenProperty) {
+			    var evtname = hackHiddenProperty.replace(/[H|h]idden/, '') + 'visibilitychange';
+			    document.addEventListener(evtname, function() {
+			        if (isHidden() || getHackVisibilityState() === 'hidden') {
+			        	$player.removeClass('player-playing').addClass('player-paused');
+			        	audioEle.pause();
+			        }
+			    }, false);
+			}
+
+			window.addEventListener('beforeunload', function() {
+			    $player.removeClass('player-playing').addClass('player-paused');
+			    audioEle.pause();
+			}, false);
 		});
 		return this;
 	}
@@ -164,5 +181,38 @@
 
 		var res = media.canPlayType('audio/' + file.split('.').pop().toLowerCase());
 		return res === 'probably' || res === 'maybe';
+	}
+
+	function getHackHidden() {
+	    if ('hidden' in document) {
+	    	return 'hidden';
+	    }
+	    for (var i = 0; i < hackPrefixes.length; i++) {
+	        if ((hackPrefixes[i] + 'Hidden') in document) {
+	            return hackPrefixes[i] + 'Hidden';
+	        }
+	    }
+	    return null;
+	}
+	
+	function getHackVisibilityState() {
+	    if ('visibilityState' in document) {
+	    	return 'visibilityState';
+	    }
+	    for (var i = 0; i < hackPrefixes.length; i++) {
+	        if ((hackPrefixes[i] + 'VisibilityState') in document) {
+	            return hackPrefixes[i] + 'VisibilityState';
+	        }
+	    }
+	    return null;
+	}
+	
+	function isHidden() {
+	    var hide = getHackHidden();
+	    if (!hide) {
+	    	return false;
+	    }
+	
+	    return document[hide];
 	}
 })(jQuery, window, document);
